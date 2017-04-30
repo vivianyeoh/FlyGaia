@@ -202,7 +202,7 @@ Fleet* displayCorporationDetails(const char *filename){
 		int amount = 0;
 		while(amount!=purAmount){
 			if(ShiptypeAmt[i][0]=="Ferry") {
-				if((costOfShips+(*FerryColony).getCost())<10000){
+				if((costOfShips+(*FerryColony).getCost())<=10000){
 					costOfShips+=(*FerryColony).getCost();
 					newfleet->addShipIntoList(FerryColony);
 				}else{
@@ -210,7 +210,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Liner"){
-				if((costOfShips+(*LinerColony).getCost())<10000){
+				if((costOfShips+(*LinerColony).getCost())<=10000){
 					costOfShips+=(*LinerColony).getCost();
 					newfleet->addShipIntoList(LinerColony);
 				}else{
@@ -218,7 +218,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Cloud"){
-				if((costOfShips+(*CloudColony).getCost())<10000){
+				if((costOfShips+(*CloudColony).getCost())<=10000){
 					costOfShips+=(*CloudColony).getCost();
 					newfleet->addShipIntoList(CloudColony);
 				}else{
@@ -226,7 +226,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Radiant"){
-				if((costOfShips+(*RadiantSolarSail).getCost())<10000){
+				if((costOfShips+(*RadiantSolarSail).getCost())<=10000){
 					costOfShips+=(*RadiantSolarSail).getCost();
 					newfleet->addShipIntoList(RadiantSolarSail);
 				}else{
@@ -234,7 +234,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Ebulient"){
-				if((costOfShips+(*EbulientSolarSail).getCost())<10000){
+				if((costOfShips+(*EbulientSolarSail).getCost())<=10000){
 					costOfShips+=(*EbulientSolarSail).getCost();
 					newfleet->addShipIntoList(EbulientSolarSail);
 				}else{
@@ -242,7 +242,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Cruiser"){
-				if((costOfShips+(*CruiserMilitaryEscort).getCost())<10000){
+				if((costOfShips+(*CruiserMilitaryEscort).getCost())<=10000){
 					costOfShips+=(*CruiserMilitaryEscort).getCost();
 					newfleet->addShipIntoList(CruiserMilitaryEscort);
 				}else{
@@ -250,7 +250,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Frigate"){
-				if((costOfShips+(*FrigateMilitaryEscort).getCost())<10000){
+				if((costOfShips+(*FrigateMilitaryEscort).getCost())<=10000){
 					costOfShips+=(*FrigateMilitaryEscort).getCost();
 					newfleet->addShipIntoList(FrigateMilitaryEscort);
 				}else{
@@ -258,7 +258,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Destroyer"){
-				if((costOfShips+(*DestroyerMilitaryEscort).getCost())<10000){
+				if((costOfShips+(*DestroyerMilitaryEscort).getCost())<=10000){
 					costOfShips+=(*DestroyerMilitaryEscort).getCost();
 					newfleet->addShipIntoList(DestroyerMilitaryEscort);
 				}else{
@@ -266,7 +266,7 @@ Fleet* displayCorporationDetails(const char *filename){
 					break;
 				}
 			}else if(ShiptypeAmt[i][0]=="Medic"){
-				if((costOfShips+(*medicShip).getCost())<10000){
+				if((costOfShips+(*medicShip).getCost())<=10000){
 					costOfShips+=(*medicShip).getCost();
 					newfleet->addShipIntoList(medicShip);
 				}else{
@@ -333,80 +333,92 @@ Fleet* userInterfaceCreateFleet(){
 	int costOfShips=0;
 	int amount = 0;
 	while(amount!=purAmount){
+		boolean overSpent = false;
 		switch(shipCode){
 		case 10000:
-			if((costOfShips+(*FerryColony).getCost())<10000){
+			if((costOfShips+(*FerryColony).getCost())<=10000){
 				costOfShips+=(*FerryColony).getCost();
 				newfleet->addShipIntoList(FerryColony);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FerryColony).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10001:
-			if((costOfShips+(*LinerColony).getCost())<10000){
+			if((costOfShips+(*LinerColony).getCost())<=10000){
 				costOfShips+=(*LinerColony).getCost();
 				newfleet->addShipIntoList(LinerColony);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*LinerColony).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10002:
-			if((costOfShips+(*CloudColony).getCost())<10000){
+			if((costOfShips+(*CloudColony).getCost())<=10000){
 				costOfShips+=(*CloudColony).getCost();
 				newfleet->addShipIntoList(CloudColony);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CloudColony).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10003:
-			if((costOfShips+(*RadiantSolarSail).getCost())<10000){
+			if((costOfShips+(*RadiantSolarSail).getCost())<=10000){
 				costOfShips+=(*RadiantSolarSail).getCost();
 				newfleet->addShipIntoList(RadiantSolarSail);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*RadiantSolarSail).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10004:
-			if((costOfShips+(*EbulientSolarSail).getCost())<10000){
+			if((costOfShips+(*EbulientSolarSail).getCost())<=10000){
 				costOfShips+=(*EbulientSolarSail).getCost();
 				newfleet->addShipIntoList(EbulientSolarSail);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*EbulientSolarSail).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10005:
-			if((costOfShips+(*CruiserMilitaryEscort).getCost())<10000){
+			if((costOfShips+(*CruiserMilitaryEscort).getCost())<=10000){
 				costOfShips+=(*CruiserMilitaryEscort).getCost();
 				newfleet->addShipIntoList(CruiserMilitaryEscort);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CruiserMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10006:
-			if((costOfShips+(*FrigateMilitaryEscort).getCost())<10000){
+			if((costOfShips+(*FrigateMilitaryEscort).getCost())<=10000){
 				costOfShips+=(*FrigateMilitaryEscort).getCost();
 				newfleet->addShipIntoList(FrigateMilitaryEscort);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FrigateMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10007:
-			if((costOfShips+(*DestroyerMilitaryEscort).getCost())<10000){
+			if((costOfShips+(*DestroyerMilitaryEscort).getCost())<=10000){
 				costOfShips+=(*DestroyerMilitaryEscort).getCost();
 				newfleet->addShipIntoList(DestroyerMilitaryEscort);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*DestroyerMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;
 		case 10008:
-			if((costOfShips+(*medicShip).getCost())<10000){
+			if((costOfShips+(*medicShip).getCost())<=10000){
 				costOfShips+=(*medicShip).getCost();
 				newfleet->addShipIntoList(medicShip);
 			}else{
 				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*medicShip).getTypeName()<<" are not purchased!"<<endl;
+				overSpent=true;
 			}
 			break;	
 		}
+		if(overSpent==true)
+			break;
 		amount++;
 	}
 	
