@@ -13,6 +13,8 @@ public:
 	
 	void calculateWeight();
 
+	void setTotalCost(int newCost);
+	
 	int getWeight() const; // Returns cumulative weight of fleet
 
 	int getEnergyConsumption() const; // Returns cumulative energy consumption of fleet

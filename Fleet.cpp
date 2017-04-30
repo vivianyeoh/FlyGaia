@@ -18,6 +18,10 @@ void Fleet::calculateWeight(){
 		weight+=(allShipList[i]->getWeight());
 }
 
+void Fleet::setTotalCost(int newCost){//must be less than 10,000
+	cost = newCost;
+}
+
 int Fleet::getWeight() const
 {
 	return weight;
