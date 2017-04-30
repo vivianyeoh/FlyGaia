@@ -10,7 +10,7 @@ class Fleet
 {
 
 public:
-	Fleet();
+	Fleet(string corName);
 
 	int getWeight() const; // Returns cumulative weight of fleet
 
@@ -65,18 +65,11 @@ protected:
 
 	string corName; // Returns your chosen name of your corporation.
 
-	vector<Ship*> pttdShipList; // Returns a vector with ship numbers of protected colony ships
-
-	vector<Ship*> unpttdShipList; // Returns a vector with ship numbers of unprotected colony ships
-
-	vector<Ship*> allColonyShipList;// Returns a vector with ship numbers of all ships that are a colony ship
-
 	vector<Ship*> allShipList;// Returns a vector with all ships in the fleet
 	
-	double* ttlPercentageColonized;
+	double ttlPercentageColonized;
 	
 	vector<GaiaSector*> colonizedAreaList;
-	
 	
 };
 

@@ -11,13 +11,13 @@ class GaiaSector
 public:
 	GaiaSector(string colonizeSection, double percentage);
 	void growPopulation();
-	void setPopulation(double newPopulation);
+	void setPopulation(int newPopulation);
 
 	
 protected:
 	string colonizeSection;
 	double percentage;
-	double population;
+	int* population;
 };
 
 #endif

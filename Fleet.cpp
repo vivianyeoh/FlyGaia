@@ -9,8 +9,8 @@
 
 using namespace std;
 
-Fleet::Fleet(){
-	*ttlPercentageColonized=0;
+Fleet::Fleet(string cn):corName(cn){
+	ttlPercentageColonized=0;
 }
 
 int Fleet::getWeight() const
@@ -55,17 +55,17 @@ string Fleet::getCorporationName() const
 
 vector<Ship*> Fleet::protectedShips() const
 {
-	return pttdShipList;
+	return allShipList;
 } // Returns a vector with ship numbers of protected colony ships
 
 vector<Ship*> Fleet::unprotectedShips() const
 {
-	return unpttdShipList;
+	return allShipList;
 } // Returns a vector with ship numbers of unprotected colony ships
 
 vector<Ship*> Fleet::colonyShips() const
 {
-	return allColonyShipList;
+	return allShipList;
 } // Returns a vector with ship numbers of all ships that are a colony ship
 
 vector<Ship*> Fleet::shipList() const
@@ -85,14 +85,14 @@ unsigned int Fleet::speedOfFleet(){
 }
 
 void Fleet::increaseColonizedPercentage(double percentage){
-	*ttlPercentageColonized+=percentage;
+	ttlPercentageColonized+=percentage;
 }
 
 void Fleet::decreaseColonizedPercentage(double percentage){
-	if(*ttlPercentageColonized>0){
-		*ttlPercentageColonized-=percentage;
-		if(*ttlPercentageColonized<0)
-		*ttlPercentageColonized=0;
+	if(ttlPercentageColonized>0){
+		ttlPercentageColonized-=percentage;
+		if(ttlPercentageColonized<0)
+		ttlPercentageColonized=0;
 	}
 }
 

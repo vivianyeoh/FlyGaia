@@ -31,7 +31,7 @@ protected:
 
 	string shipType; // Returns the ship type, e.g. Ferry, Cruiser, or Ebulient. Note that spelling mistakes may effect your grade!
 
-	bool* status; //whether the ship is destroyed
+	bool status; //whether the ship is destroyed
 };
 
 class ColonyShip:public Ship{
@@ -50,7 +50,7 @@ protected:
 	
 	int nrOfColonists;// nr of colonists of a ship
 	
-	bool* infectedStatus;
+	bool infectedStatus;
 };
 
 class SolarSailShip:public Ship{
