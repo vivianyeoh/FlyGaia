@@ -3,8 +3,7 @@
 using namespace std;
 
 Ship::Ship(int e,int sw,int sc,string st):energyConsump(e),shipWeight(sw),shipCost(sc),shipType(st){
-	status = true; // Original status is true
-	
+	status = true; // Original status is true	
 }
 
 int Ship::getEnergyConsumption() const
@@ -29,7 +28,7 @@ string Ship::getTypeName() const
 
 bool Ship::isDestroyed() const
 {
-	return (status)==true;
+	return status;
 } // Returns true if the ship is destroyed, false otherwise
 
 ColonyShip::ColonyShip(int e,int sw,int sc,string st,int nr):Ship(e,sw,sc,st),nrOfColonists(nr){

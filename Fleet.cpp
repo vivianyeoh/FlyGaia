@@ -1,16 +1,15 @@
 #include "Fleet.h"
 #include "Ship.h"
-#include "GaiaSector.h"
 #include <iostream>
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#define SPEED_OF_LIGHT 299792458L
+#define SPEED_OF_LIGHT_IN_MS 299792458L
+#define LIGHT_YEAR_IN_METER 9460730472580000L
 
 using namespace std;
 
 Fleet::Fleet(string cn):corName(cn){
-	ttlPercentageColonized=0;
 }
 
 int Fleet::getWeight() const
@@ -65,7 +64,11 @@ vector<Ship*> Fleet::unprotectedShips() const
 
 vector<Ship*> Fleet::colonyShips() const
 {
-	return allShipList;
+	vector<Ship*> colonyShipList;
+	for(int i=0; i< allShipList.size();i++)
+		if(Ship* v = dynamic_cast<Ship*>(allShipList[i]))
+			if(v!=NULL)colonyShipList.push_back(v);
+	return ;
 } // Returns a vector with ship numbers of all ships that are a colony ship
 
 vector<Ship*> Fleet::shipList() const
@@ -81,27 +84,7 @@ void Fleet::destroyShip(Ship* i) {
 } // Removes ship i from the fleet
 
 unsigned int Fleet::speedOfFleet(){
-	return ((10*(unsigned int)SPEED_OF_LIGHT)/(sqrt (weight)));
-}
-
-void Fleet::increaseColonizedPercentage(double percentage){
-	ttlPercentageColonized+=percentage;
-}
-
-void Fleet::decreaseColonizedPercentage(double percentage){
-	if(ttlPercentageColonized>0){
-		ttlPercentageColonized-=percentage;
-		if(ttlPercentageColonized<0)
-		ttlPercentageColonized=0;
-	}
-}
-
-vector<GaiaSector*> Fleet::getClonizedAreaList() {
-	return colonizedAreaList;
-}
-
-void Fleet::addColonizedArea(GaiaSector* sec){
-	colonizedAreaList.push_back(sec);
+	return ((10*(unsigned int)SPEED_OF_LIGHT_IN_MS)/(sqrt (weight)));
 }
 
 void Fleet::addShipIntoList(Ship* i){

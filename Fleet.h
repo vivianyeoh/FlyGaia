@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include "Ship.h"
-#include "GaiaSector.h"
 #ifndef FLEET_H
 #define FLEET_H
 using namespace std;
@@ -40,14 +39,6 @@ public:
 
 	unsigned int speedOfFleet();
 	
-	void increaseColonizedPercentage(double percentage);
-	
-	void decreaseColonizedPercentage(double percentage);
-	
-	vector<GaiaSector*> getClonizedAreaList(); 
-	
-	void addColonizedArea(GaiaSector* sec); 
-	
 	void addShipIntoList(Ship* i);
 	
 protected:
@@ -65,11 +56,7 @@ protected:
 
 	string corName; // Returns your chosen name of your corporation.
 
-	vector<Ship*> allShipList;// Returns a vector with all ships in the fleet
-	
-	double ttlPercentageColonized;
-	
-	vector<GaiaSector*> colonizedAreaList;
+	vector<Ship*> allShipList;// Returns a vector with all ships in the fleet	
 	
 };
 
