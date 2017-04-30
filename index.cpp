@@ -173,8 +173,7 @@ void splashScreen()
 
 Fleet* displayCorporationDetails(const char *filename){
 	
-	int num;                //store number of students
-	string ShiptypeAmt[40][2];      //store students ID
+	string ShiptypeAmt[40][2];//store ship type and amount of each ship
 
 	ifstream file(filename); // pass file name as argument
 	if(!file)
@@ -286,7 +285,7 @@ Fleet* displayCorporationDetails(const char *filename){
 }
 
 Fleet* userInterfaceCreateFleet(){
-	cout<<"Corporation code(5 digits): ";
+	cout<<"Corporation code(5 digits) (Same corporation code to overwrite previous data): ";
 	string corName;
 	while(std::getline(std::cin,corName) && corName.size() != 5) {
 		cout << "Please enter a valid Corporation code(5 digits)!\n";
@@ -310,118 +309,157 @@ Fleet* userInterfaceCreateFleet(){
 	cout<<"\t|   10008   |   Medic   | 1000 |    1   |      1       |                     |"<<endl;
 	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
 	cout<<"\n\n*Consumption as in Energy Consumption\n";
-	cout<<"\n*Generate as in Generate Energy\n\n\n";
+	cout<<"*Generate as in Generate Energy\n\n\n";
 	
 	Fleet* newfleet = new Fleet(corName);
-	string shipType;
-	int shipCode=0;
-	cout<<"Type of ship (Please key in the ship code): ";	
-	while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)) {
-         cout << "Type of ship (Please key in the ship code): ";
-         cin.clear();
-		 cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
-	
-	cout<<"Number of ships: ";
-	int purAmount=0;
-	while (!(std::cin >> purAmount)|purAmount<0) {
-         cout << "Please enter a valid number of ships: \n";
-         cin.clear();
-		 cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    }
+	string inputShipType;
+	ofstream outputFile;
+	string fname = corName+ "-fleet.dat";
+	outputFile.open(fname.c_str());
 	
 	int costOfShips=0;
-	int amount = 0;
-	while(amount!=purAmount){
-		boolean overSpent = false;
-		switch(shipCode){
-		case 10000:
-			if((costOfShips+(*FerryColony).getCost())<=10000){
-				costOfShips+=(*FerryColony).getCost();
-				newfleet->addShipIntoList(FerryColony);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FerryColony).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10001:
-			if((costOfShips+(*LinerColony).getCost())<=10000){
-				costOfShips+=(*LinerColony).getCost();
-				newfleet->addShipIntoList(LinerColony);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*LinerColony).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10002:
-			if((costOfShips+(*CloudColony).getCost())<=10000){
-				costOfShips+=(*CloudColony).getCost();
-				newfleet->addShipIntoList(CloudColony);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CloudColony).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10003:
-			if((costOfShips+(*RadiantSolarSail).getCost())<=10000){
-				costOfShips+=(*RadiantSolarSail).getCost();
-				newfleet->addShipIntoList(RadiantSolarSail);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*RadiantSolarSail).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10004:
-			if((costOfShips+(*EbulientSolarSail).getCost())<=10000){
-				costOfShips+=(*EbulientSolarSail).getCost();
-				newfleet->addShipIntoList(EbulientSolarSail);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*EbulientSolarSail).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10005:
-			if((costOfShips+(*CruiserMilitaryEscort).getCost())<=10000){
-				costOfShips+=(*CruiserMilitaryEscort).getCost();
-				newfleet->addShipIntoList(CruiserMilitaryEscort);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CruiserMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10006:
-			if((costOfShips+(*FrigateMilitaryEscort).getCost())<=10000){
-				costOfShips+=(*FrigateMilitaryEscort).getCost();
-				newfleet->addShipIntoList(FrigateMilitaryEscort);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FrigateMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10007:
-			if((costOfShips+(*DestroyerMilitaryEscort).getCost())<=10000){
-				costOfShips+=(*DestroyerMilitaryEscort).getCost();
-				newfleet->addShipIntoList(DestroyerMilitaryEscort);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*DestroyerMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;
-		case 10008:
-			if((costOfShips+(*medicShip).getCost())<=10000){
-				costOfShips+=(*medicShip).getCost();
-				newfleet->addShipIntoList(medicShip);
-			}else{
-				cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*medicShip).getTypeName()<<" are not purchased!"<<endl;
-				overSpent=true;
-			}
-			break;	
+	char moreShip = 'N';
+	
+	do{
+		int shipCode=0;
+		cout<<"Type of ship (Please key in the ship code): ";	
+		while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)) {
+			cout << "Type of ship (Please key in the ship code): ";
+			cin.clear();
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
-		if(overSpent==true)
+		
+		cout<<"Number of ships: ";
+		int purAmount=0;
+		while (!(std::cin >> purAmount)|purAmount<0) {
+			cout << "Please enter a valid number of ships: \n";
+			cin.clear();
+			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+		
+		int amount = 0;
+		
+		while(amount!=purAmount){
+			boolean overSpent = false;
+			switch(shipCode){
+			case 10000:
+				if((costOfShips+(*FerryColony).getCost())<=10000){
+					costOfShips+=(*FerryColony).getCost();
+					newfleet->addShipIntoList(FerryColony);
+					inputShipType = (*FerryColony).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FerryColony).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10001:
+				if((costOfShips+(*LinerColony).getCost())<=10000){
+					costOfShips+=(*LinerColony).getCost();
+					newfleet->addShipIntoList(LinerColony);
+					inputShipType = (*LinerColony).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*LinerColony).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10002:
+				if((costOfShips+(*CloudColony).getCost())<=10000){
+					costOfShips+=(*CloudColony).getCost();
+					newfleet->addShipIntoList(CloudColony);
+					inputShipType = (*CloudColony).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CloudColony).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10003:
+				if((costOfShips+(*RadiantSolarSail).getCost())<=10000){
+					costOfShips+=(*RadiantSolarSail).getCost();
+					newfleet->addShipIntoList(RadiantSolarSail);
+					inputShipType = (*RadiantSolarSail).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*RadiantSolarSail).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10004:
+				if((costOfShips+(*EbulientSolarSail).getCost())<=10000){
+					costOfShips+=(*EbulientSolarSail).getCost();
+					newfleet->addShipIntoList(EbulientSolarSail);
+					inputShipType = (*EbulientSolarSail).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*EbulientSolarSail).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10005:
+				if((costOfShips+(*CruiserMilitaryEscort).getCost())<=10000){
+					costOfShips+=(*CruiserMilitaryEscort).getCost();
+					newfleet->addShipIntoList(CruiserMilitaryEscort);
+					inputShipType = (*CruiserMilitaryEscort).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CruiserMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10006:
+				if((costOfShips+(*FrigateMilitaryEscort).getCost())<=10000){
+					costOfShips+=(*FrigateMilitaryEscort).getCost();
+					newfleet->addShipIntoList(FrigateMilitaryEscort);
+					inputShipType = (*FrigateMilitaryEscort).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FrigateMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10007:
+				if((costOfShips+(*DestroyerMilitaryEscort).getCost())<=10000){
+					costOfShips+=(*DestroyerMilitaryEscort).getCost();
+					newfleet->addShipIntoList(DestroyerMilitaryEscort);
+					inputShipType = (*DestroyerMilitaryEscort).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*DestroyerMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;
+			case 10008:
+				if((costOfShips+(*medicShip).getCost())<=10000){
+					costOfShips+=(*medicShip).getCost();
+					newfleet->addShipIntoList(medicShip);
+					inputShipType = (*medicShip).getTypeName();
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*medicShip).getTypeName()<<" are not purchased!"<<endl;
+					overSpent=true;
+				}
+				break;	
+			}
+			if(overSpent==true)
+				break;
+			amount++;
+		}
+		
+		outputFile <<inputShipType<<" "<<amount<<endl;
+		
+		if(costOfShips<10000){
+			cout<<"Add more ships? (Y/N):  ";
+			while (!(std::cin >> moreShip)|!toupper(moreShip)=='Y'|!toupper(moreShip)=='N') {
+				cout << "Please enter a response (Y/N): \n";
+				cin.clear();
+				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+			}
+		}else{
+			toupper(moreShip)=='N';
 			break;
-		amount++;
+		}
+	}while(toupper(moreShip)=='Y');
+	
+	newfleet->setTotalCost(costOfShips);
+	
+	cout<<"Total ship purchased: \n";
+	for(int i=0; i<((*newfleet).shipList()).size();i++){
+		cout<<(i+1)<<". "<<((*newfleet).shipList())[i]->getTypeName()<<endl;
 	}
-	
-	
+
+
 	return newfleet;
 }
