@@ -3,7 +3,9 @@
 #include <cstdlib>
 #include <pthread.h>
 #include <fstream>
-#include <string>
+#include<cstring>
+#include<stdlib.h>
+#include<string>
 #include "Fleet.h"
 #include "Ship.h"
 #include "GaiaSector.h"
@@ -15,7 +17,7 @@ void *gaiaExist(void *threadid);
 void *displayYearPopulation(void *threadid);
 void splashScreen();
 void waitOneYear();
-Fleet* displayCorporationDetails(string fileName);
+Fleet* displayCorporationDetails(const char *filename);
 Fleet* userInterfaceCreateFleet(); 
 
 ColonyShip* FerryColony;
@@ -36,7 +38,7 @@ int main(  )
 	LinerColony = new ColonyShip(7,20,1000,"Liner",250);
 	CloudColony = new ColonyShip(9,30,2000,"Cloud",750);
 
-	RadiantSolarSail = new SolarSailShip(5,3,50,"Radient",50);
+	RadiantSolarSail = new SolarSailShip(5,3,50,"Radiant",50);
 	EbulientSolarSail = new SolarSailShip(5,50,250,"Ebulient",500);
 	
 	CruiserMilitaryEscort = new MilitaryEscortShip(10,2,300,"Cruiser",0);	
@@ -48,17 +50,18 @@ int main(  )
 	
 	splashScreen();
 	
-	cout<<"Corporation under: 025280\n"<<endl;
+	cout<<"Existing competitors:\n\n";
+	cout<<"\nCorporation under: 025280\n"<<endl;
 	Fleet* corporation1 = displayCorporationDetails("025280-fleet.dat");
 	
-	cout<<"Corporation under: 023330\n"<<endl;
-	Fleet* corporation2 = displayCorporationDetails("023330-fleet");
+	cout<<"\nCorporation under: 023330\n"<<endl;
+	Fleet* corporation2 = displayCorporationDetails("023330-fleet.dat");
 	
-	cout<<"Corporation under: 019785\n"<<endl;
-	Fleet* corporation3 = displayCorporationDetails("019785-fleet");
+	cout<<"\nCorporation under: 019785\n"<<endl;
+	Fleet* corporation3 = displayCorporationDetails("019785-fleet.dat");
 	
-	cout<<"Corporation under: 018957\n"<<endl;
-	Fleet* corporation4 = displayCorporationDetails("018957-fleet");
+	cout<<"\nCorporation under: 018957\n"<<endl;
+	Fleet* corporation4 = displayCorporationDetails("018957-fleet.dat");
 	
 	pthread_t threads[NUM_THREADS];
 	int rc;
@@ -99,7 +102,7 @@ void *gaiaExist(void *threadid) {
 			tempYear=year;
 		}
 		if(year>10)
-			break;
+		break;
 	}
 	pthread_exit(NULL);
 }
@@ -113,7 +116,7 @@ void *displayYearPopulation(void *threadid) {
 		gaia->growPopulation();
 		year++;
 		if(year>10)
-			break;
+		break;
 	}
 	pthread_exit(NULL);
 }
@@ -165,13 +168,12 @@ void splashScreen()
 }
 
 
-Fleet* displayCorporationDetails(string fileName){
+Fleet* displayCorporationDetails(const char *filename){
 	
 	int num;                //store number of students
 	string ShiptypeAmt[40][2];      //store students ID
 
-	ifstream file(fileName); // pass file name as argment
-Fleet* newfleet = new Fleet(fileName.substr(0, 4));
+	ifstream file(filename); // pass file name as argument
 	if(!file)
 	{
 		cout << "Cannot open input file.\n";
@@ -184,39 +186,108 @@ Fleet* newfleet = new Fleet(fileName.substr(0, 4));
 		{
 			file>>ShiptypeAmt[linecount][0];
 			file>>ShiptypeAmt[linecount][1];
-			
 			cout<<"Ship type: "<<ShiptypeAmt[linecount][0]<<" amount: "<<ShiptypeAmt[linecount][1]<<endl;
-			
 			linecount++ ;
 		}
 	}
 	file.close();
 	
+	string fleetname =  string (filename, 5);
+	Fleet* newfleet = new Fleet(fleetname);
+	int costOfShips=0;
 	for(int i=0; i<linecount;i++){
-		
-			if(ShiptypeAmt[i][0]=="Ferry") 
-				newfleet->addShipIntoList(FerryColony);
-				else if(ShiptypeAmt[i][0]=="Liner")
-				newfleet->addShipIntoList(LinerColony);
-				else if(ShiptypeAmt[i][0]=="Cloud")
-				newfleet->addShipIntoList(CloudColony);
-				else if(ShiptypeAmt[i][0]=="Radient")
-				newfleet->addShipIntoList(RadiantSolarSail);
-				else if(ShiptypeAmt[i][0]=="Ebulient")
-				newfleet->addShipIntoList(EbulientSolarSail);
-				else if(ShiptypeAmt[i][0]=="Cruiser")
-				newfleet->addShipIntoList(CruiserMilitaryEscort);
-				else if(ShiptypeAmt[i][0]=="Frigate")
-				newfleet->addShipIntoList(FrigateMilitaryEscort);
-				else if(ShiptypeAmt[i][0]=="Destroyer")
-				newfleet->addShipIntoList(DestroyerMilitaryEscort);
-				else if(ShiptypeAmt[i][0]=="Medic")
-				newfleet->addShipIntoList(medicShip);
-				
+		int purAmount = atoi(ShiptypeAmt[i][1].c_str());
+		int amount = 0;
+		while(amount!=purAmount){
+			if(ShiptypeAmt[i][0]=="Ferry") {
+				if((costOfShips+(*FerryColony).getCost())<10000){
+					costOfShips+=(*FerryColony).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(FerryColony);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Liner"){
+				if((costOfShips+(*LinerColony).getCost())<10000){
+					costOfShips+=(*LinerColony).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(LinerColony);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Cloud"){
+				if((costOfShips+(*CloudColony).getCost())<10000){
+					costOfShips+=(*CloudColony).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(CloudColony);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Radiant"){
+				if((costOfShips+(*RadiantSolarSail).getCost())<10000){
+					costOfShips+=(*RadiantSolarSail).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(RadiantSolarSail);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Ebulient"){
+				if((costOfShips+(*EbulientSolarSail).getCost())<10000){
+					costOfShips+=(*EbulientSolarSail).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(EbulientSolarSail);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Cruiser"){
+				if((costOfShips+(*CruiserMilitaryEscort).getCost())<10000){
+					costOfShips+=(*CruiserMilitaryEscort).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(CruiserMilitaryEscort);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Frigate"){
+				if((costOfShips+(*FrigateMilitaryEscort).getCost())<10000){
+					costOfShips+=(*FrigateMilitaryEscort).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(FrigateMilitaryEscort);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Destroyer"){
+				if((costOfShips+(*DestroyerMilitaryEscort).getCost())<10000){
+					costOfShips+=(*DestroyerMilitaryEscort).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(DestroyerMilitaryEscort);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}else if(ShiptypeAmt[i][0]=="Medic"){
+				if((costOfShips+(*medicShip).getCost())<10000){
+					costOfShips+=(*medicShip).getCost();
+					cout<<"cost of colony ship"<<costOfShips<<endl;
+					newfleet->addShipIntoList(medicShip);
+				}else{
+					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<ShiptypeAmt[i][0]<<" are not purchased!"<<endl;
+					break;
+				}
+			}
+			amount++;
 		}
 	}
 	
-	cout<<"Size of colony ship"<<(newfleet->colonyShips()).size();
+	cout<<"Size of colony ship"<<((*newfleet).colonyShips()).size()<<endl;	
+	cout<<"speedOfFleet of colony ship"<<(*newfleet).speedOfFleet()<<endl;
+	cout<<"cost of colony ship"<<costOfShips<<endl;
 }
 
 Fleet* userInterfaceCreateFleet(){

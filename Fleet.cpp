@@ -10,6 +10,12 @@
 using namespace std;
 
 Fleet::Fleet(string cn):corName(cn){
+	weight=0;
+}
+
+void Fleet::calculateWeight(){
+	for(int i=0; i< allShipList.size();i++)
+		weight+=(allShipList[i]->getWeight());
 }
 
 int Fleet::getWeight() const
@@ -44,7 +50,9 @@ int Fleet::countProtectedShips() const
 
 bool Fleet::hasMedic() const
 {
-	return medicShip>0;
+	for(int i=0; i< allShipList.size();i++)
+		if((*allShipList[i]).getTypeName()=="Medic" )
+	return true;
 } // Returns True if the fleet has a medic ship, false otherwise
 
 string Fleet::getCorporationName() const
@@ -66,9 +74,9 @@ vector<Ship*> Fleet::colonyShips() const
 {
 	vector<Ship*> colonyShipList;
 	for(int i=0; i< allShipList.size();i++)
-		if(Ship* v = dynamic_cast<Ship*>(allShipList[i]))
-			if(v!=NULL)colonyShipList.push_back(v);
-	return ;
+		if((*allShipList[i]).getTypeName()=="Ferry" | (*allShipList[i]).getTypeName()=="Liner" |(*allShipList[i]).getTypeName()=="Cloud" )
+			colonyShipList.push_back(allShipList[i]);
+	return colonyShipList;
 } // Returns a vector with ship numbers of all ships that are a colony ship
 
 vector<Ship*> Fleet::shipList() const
@@ -89,4 +97,5 @@ unsigned int Fleet::speedOfFleet(){
 
 void Fleet::addShipIntoList(Ship* i){
 	allShipList.push_back(i);
+	calculateWeight();
 }

@@ -10,6 +10,8 @@ class Fleet
 
 public:
 	Fleet(string corName);
+	
+	void calculateWeight();
 
 	int getWeight() const; // Returns cumulative weight of fleet
 
