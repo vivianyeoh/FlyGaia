@@ -11,8 +11,12 @@ class Fleet
 public:
 	Fleet(string corName);
 	
-	void calculateWeight();
+	void addWeight(Ship* s);
+	
+	void addColonists(ColonyShip* s);
 
+	void setColonists(int colonists);
+	
 	void setTotalCost(int newCost);
 	
 	int getWeight() const; // Returns cumulative weight of fleet

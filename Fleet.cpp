@@ -4,18 +4,22 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#define SPEED_OF_LIGHT_IN_MS 299792458L
-#define LIGHT_YEAR_IN_METER 9460730472580000L
+#define SPEED_OF_LIGHT_IN_KMS 299792L
+
 
 using namespace std;
 
 Fleet::Fleet(string cn):corName(cn){
 	weight=0;
+	colonistCount=0;
 }
 
-void Fleet::calculateWeight(){
-	for(int i=0; i< allShipList.size();i++)
-		weight+=(allShipList[i]->getWeight());
+void Fleet::addWeight(Ship* s){
+		weight+=(s->getWeight());
+}
+
+void Fleet::addColonists(ColonyShip* s){
+		colonistCount+=s->getColonistCount();
 }
 
 void Fleet::setTotalCost(int newCost){//must be less than 10,000
@@ -96,10 +100,16 @@ void Fleet::destroyShip(Ship* i) {
 } // Removes ship i from the fleet
 
 unsigned int Fleet::speedOfFleet(){
-	return ((10*(unsigned int)SPEED_OF_LIGHT_IN_MS)/(sqrt (weight)));
+	return ((10*(unsigned int)SPEED_OF_LIGHT_IN_KMS)/(sqrt (weight)));
 }
 
 void Fleet::addShipIntoList(Ship* i){
 	allShipList.push_back(i);
-	calculateWeight();
+	addWeight(i);
+	if((*i).getTypeName()=="Ferry" | (*i).getTypeName()=="Liner" |(*i).getTypeName()=="Cloud" )
+		addColonists((ColonyShip*)i);
+}
+
+void Fleet::setColonists(int colonists){
+	colonistCount = colonists;
 }

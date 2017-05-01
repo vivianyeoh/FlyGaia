@@ -5,23 +5,24 @@
 #include <iostream>
 #include <limits>
 #include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <string>
+#include <string.h>
 #include <vector>
 
 #include "Fleet.h"
 #include "GaiaSector.h"
 #include "Ship.h"
 
-#define NUM_THREADS 5
+#define NUM_THREADS 3
 
 using namespace std;
 
-void *gaiaExist(void *threadid);
-void *displayYearPopulation(void *threadid);
+void *compareFleet(void *threadid);
+void *setFleetandPopulation(void *threadid);
 void splashScreen();
-void rivalBoard();
-void waitOneYear();
+void displayGaiaCurrentData();
+void *timePassingYear(void *threadid);
 Fleet* displayCorporationDetails(const char *filename);
 Fleet* userInterfaceCreateFleet(); 
 
@@ -33,10 +34,14 @@ SolarSailShip* EbulientSolarSail;
 MilitaryEscortShip* CruiserMilitaryEscort;
 MilitaryEscortShip* FrigateMilitaryEscort;
 MilitaryEscortShip* DestroyerMilitaryEscort;
+Fleet* corporation1;
+Fleet* userCor;
+Fleet* settlerGaia;
+Fleet* settlerRival;
 Ship* medicShip;
 GaiaSector* gaia;
 int year=1;
-
+bool settlerGaiaChanged=false;
 int main(  )
 {
 	FerryColony = new ColonyShip(5,10,500,"Ferry",100);
@@ -57,8 +62,8 @@ int main(  )
 	
 	cout<<"Existing competitors:\n";
 	cout<<"\nCorporation under: 025280"<<endl;
-	Fleet* corporation1 = displayCorporationDetails("025280-fleet.dat");
-	
+	corporation1 = displayCorporationDetails("025280-fleet.dat");
+	/*
 	cout<<"\nCorporation under: 023330"<<endl;
 	Fleet* corporation2 = displayCorporationDetails("023330-fleet.dat");
 	
@@ -67,28 +72,29 @@ int main(  )
 	
 	cout<<"\nCorporation under: 018957"<<endl;
 	Fleet* corporation4 = displayCorporationDetails("018957-fleet.dat");
+	*/
 	
-	Fleet* testCor = userInterfaceCreateFleet();
+	userCor = userInterfaceCreateFleet();
 	
-	cout<<"\nTime to launch the fleet!"<<endl;
+	/*cout<<"\nTime to launch the fleet!"<<endl;
 	cout<<"3"<<endl;
-	Sleep(2000);
+	Sleep(500);
 	cout<<"2"<<endl;
-	Sleep(2000);
+	Sleep(500);
 	cout<<"1"<<endl;
-	Sleep(2000);
+	Sleep(500);
 	for(int i=0;i<10; i++){
 		cout<<"-";	
-		Sleep(500);
+		Sleep(200);
 	}
 	cout<<">"<<endl;
+	*/
 	
-	/*
 	pthread_t threads[NUM_THREADS];
 	int rc;
 	int i=0;//thread 0
 	
-	rc = pthread_create(&threads[i], NULL, gaiaExist, (void *)i);
+	rc = pthread_create(&threads[i], NULL, compareFleet, (void *)i);
 	
 	if (rc){
 		cout << "Error:unable to create thread," << rc << endl;
@@ -96,7 +102,15 @@ int main(  )
 	}
 	
 	i=1;//thread 1
-	rc = pthread_create(&threads[i], NULL, displayYearPopulation, (void *)i);
+	rc = pthread_create(&threads[i], NULL, setFleetandPopulation, (void *)i);
+	
+	if (rc){
+		cout << "Error:unable to create thread," << rc << endl;
+		exit(-1);
+	}
+	
+	i=2;//thread 2
+	rc = pthread_create(&threads[i], NULL, timePassingYear, (void *)i);
 	
 	if (rc){
 		cout << "Error:unable to create thread," << rc << endl;
@@ -104,41 +118,90 @@ int main(  )
 	}
 	
 	pthread_exit(NULL);	
-*/
+
 	return 0;
 }
 
-void waitOneYear()
+void *timePassingYear(void *threadid)
 {
-	Sleep(5000);//one year is 5 second
+	while(true){
+		Sleep(2000);//one year is 5 second
+
+		if(gaia->getPopulation()>0){
+			gaia->growPopulation();
+			settlerGaia->setColonists(gaia->getPopulation());
+		}
+		year++;
+		if(year>10){
+			break;
+		}
+	}pthread_exit(NULL);
 }
 
-void *gaiaExist(void *threadid) {
+void *compareFleet(void *threadid) {	
 	int tempYear = 0;
+	int speedOfCor1 = corporation1->speedOfFleet();
+	int speedOfCor2 = userCor->speedOfFleet();
+	
+	if(speedOfCor1>speedOfCor2){//faster fleet will reach first
+		settlerGaia = corporation1;
+		settlerRival= userCor;		
+	}else{
+		settlerGaia = userCor;
+		settlerRival= corporation1;
+	}
+	
 	while(true){
-		if(tempYear<year){//to ensure this thread runs after the other threads have finished their job and time
-			
-			
+		if(tempYear<year){//to ensure this thread runs after another year
+			if(year==3){//assume another fleet reached after 3 years
+				if((*settlerGaia).getColonistCount()<(*settlerRival).getColonistCount()){//compare number of colonist
+					Fleet * temp = settlerGaia;
+					settlerGaia = settlerRival;
+					settlerRival = temp;
+					settlerGaiaChanged = true;
+				}
+			}
 			tempYear=year;
 		}
-		if(year>10)
-		break;
+		if(year>10){
+			break;
+		}
 	}
 	pthread_exit(NULL);
 }
 
-void *displayYearPopulation(void *threadid) {
+void *setFleetandPopulation(void *threadid) {
+	int tempYear = 0;
 	while(true){
-		cout<<"\n--------------------------------";
-		cout<<"\nCurrent Population: "<<(*gaia).getPopulation();
-		cout<<"\nYear: "<<year;
-		waitOneYear();
-		gaia->growPopulation();
-		year++;
-		if(year>10)
-		break;
+		if(tempYear<year){//to ensure this thread runs after another year
+			gaia->setFleet(settlerGaia);
+			gaia->setPopulation((*settlerGaia).getColonistCount());
+			tempYear=year;
+			displayGaiaCurrentData();
+		}
+		if(year>10){
+			break;
+		}
+		
 	}
 	pthread_exit(NULL);
+}
+	
+void displayGaiaCurrentData(){
+	cout<<"\n";
+	cout<<"\nYear: "<<year<<" in Gaia"<<endl;
+	
+	if(year==4){
+		if(settlerGaiaChanged){
+			cout<<"The new settler in Gaia is: "<<(*settlerGaia).getCorporationName()<<endl;
+			settlerGaiaChanged=false;
+		}else{
+			cout<<"The rival of corporation "<<(*settlerRival).getCorporationName()<<" has failed to take over Gaia with population of "<<(*settlerRival).getColonistCount()<<endl;
+		}
+	}
+	
+	cout<<"Current Population in Gaia: "<<(*gaia).getPopulation()<<endl;
+	cout<<"Corporation Code "<<(*settlerGaia).getCorporationName()<<" with a population of "<<(*settlerGaia).getColonistCount()<<" is colonising Gaia!";
 }
 
 void splashScreen()
@@ -297,6 +360,8 @@ Fleet* displayCorporationDetails(const char *filename){
 	for(int i=0; i<((*newfleet).shipList()).size();i++){
 		cout<<(i+1)<<". "<<((*newfleet).shipList())[i]->getTypeName()<<endl;
 	}
+	
+	return newfleet;
 }
 
 Fleet* userInterfaceCreateFleet(){
@@ -458,7 +523,7 @@ Fleet* userInterfaceCreateFleet(){
 				break;	
 			}
 			if(overSpent==true)
-				break;
+			break;
 			amount++;
 		}
 		
