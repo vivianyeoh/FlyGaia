@@ -124,17 +124,15 @@ int main(  )
 
 void *timePassingYear(void *threadid)
 {
-	while(true){
-		Sleep(2000);//one year is 5 second
-
-		if(gaia->getPopulation()>0){
-			gaia->growPopulation();
-			settlerGaia->setColonists(gaia->getPopulation());
-		}
-		year++;
+	while(true){		
 		if(year>10){
 			break;
 		}
+		Sleep(2000);//one year is 5 second
+		gaia->growPopulation();
+		settlerGaia->setColonists(gaia->getPopulation());
+		year++;
+
 	}pthread_exit(NULL);
 }
 
@@ -152,6 +150,9 @@ void *compareFleet(void *threadid) {
 	}
 	
 	while(true){
+		if(year>10){
+			break;
+		}
 		if(tempYear<year){//to ensure this thread runs after another year
 			if(year==3){//assume another fleet reached after 3 years
 				if((*settlerGaia).getColonistCount()<(*settlerRival).getColonistCount()){//compare number of colonist
@@ -159,13 +160,13 @@ void *compareFleet(void *threadid) {
 					settlerGaia = settlerRival;
 					settlerRival = temp;
 					settlerGaiaChanged = true;
+					gaia->setFleet(settlerGaia);
+					gaia->setPopulation((*settlerGaia).getColonistCount());
 				}
 			}
 			tempYear=year;
 		}
-		if(year>10){
-			break;
-		}
+		
 	}
 	pthread_exit(NULL);
 }
@@ -173,20 +174,19 @@ void *compareFleet(void *threadid) {
 void *setFleetandPopulation(void *threadid) {
 	int tempYear = 0;
 	while(true){
-		if(tempYear<year){//to ensure this thread runs after another year
-			gaia->setFleet(settlerGaia);
-			gaia->setPopulation((*settlerGaia).getColonistCount());
-			tempYear=year;
-			displayGaiaCurrentData();
-		}
 		if(year>10){
 			break;
 		}
-		
+		if(tempYear<year){//to ensure this thread runs after another year
+			gaia->setFleet(settlerGaia);
+			gaia->setPopulation((*settlerGaia).getColonistCount());
+			displayGaiaCurrentData();
+			tempYear=year;
+		}		
 	}
 	pthread_exit(NULL);
 }
-	
+
 void displayGaiaCurrentData(){
 	cout<<"\n";
 	cout<<"\nYear: "<<year<<" in Gaia"<<endl;
