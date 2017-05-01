@@ -425,9 +425,10 @@ Fleet* userInterfaceCreateFleet(){
 	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10008   |   Medic   | 1000 |    1   |      1       |                     |"<<endl;
 	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
-	cout<<"\n\n*Consumption as in Energy Consumption\n";
-	cout<<"*Generate as in Generate Energy for ship\n";
-	cout<<"Each corporation has only 10,000 UNP to spend on ships. \n\n\n";
+	cout<<"\n\n*Consumption as in Energy Consumption"<<endl;
+	cout<<"*Generate as in Generate Energy for ship"<<endl;
+	cout<<"*Each corporation has only 10,000 UNP to spend on ships"<<endl;
+	cout<<"*All ships in your fleet must have power(Energy)\n";
 	
 	Fleet* newfleet = new Fleet(corName);
 	string inputShipType;
@@ -441,8 +442,14 @@ Fleet* userInterfaceCreateFleet(){
 	do{
 		int shipCode=0;
 		cout<<"\n\nType of ship (Please key in the ship code): ";	
-		while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)) {
-			cout << "Type of ship (Please key in the ship code): ";
+		
+		while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)|(newfleet->EnergyProduction()<=newfleet->getEnergyConsumption()&&(shipCode!=10003&&shipCode!=10004))) {
+			if((newfleet->EnergyProduction()<=newfleet->getEnergyConsumption()&&(shipCode!=10003&&shipCode!=10004))){
+				cout<<"No energy generating! All ships in your fleet must have power, or else the entire fleet will not move!! Please purchase a Solar Sail Ships first (Radiant/Ebulient)"<<endl;
+				cout << "Type of ship (Please key in the ship code): ";	
+			}else{
+				cout << "Type of ship (Please key in the ship code): ";
+			}	
 			cin.clear();
 			cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 		}
@@ -456,9 +463,9 @@ Fleet* userInterfaceCreateFleet(){
 		}
 		
 		int amount = 0;
-		
 		while(amount!=purAmount){
 			boolean overSpent = false;
+			
 			switch(shipCode){
 			case 10000:
 				if((costOfShips+(*FerryColony).getCost())<=10000){
@@ -550,6 +557,7 @@ Fleet* userInterfaceCreateFleet(){
 					overSpent=true;
 				}
 				break;	
+				
 			}
 			if(overSpent==true)
 			break;
@@ -558,14 +566,16 @@ Fleet* userInterfaceCreateFleet(){
 		
 		outputFile <<inputShipType<<" "<<amount<<endl;
 		
+		
+		cout<<"Total Cost: "<<newfleet->getCost()<<endl;
+		cout<<"Total energy consumpted: "<<newfleet->getEnergyConsumption()<<endl;
+		cout<<"Total energy generated: "<<newfleet->EnergyProduction()<<endl;
+		cout<<"Total weight: "<<newfleet->getWeight()<<endl;
+		cout<<"Total colonists: "<<newfleet->getColonistCount()<<endl;
+		cout<<"Total colony ship protected: "<<newfleet->countProtectedShips()<<endl;
+		cout<<"Has medic: "<<(newfleet->hasMedic()?"Yes":"No")<<endl;
+		
 		if(costOfShips<10000){
-			cout<<"Total Cost: "<<newfleet->getCost()<<endl;
-			cout<<"Total energy consumpted: "<<newfleet->getEnergyConsumption()<<endl;
-			cout<<"Total energy generated: "<<newfleet->EnergyProduction()<<endl;
-			cout<<"Total weight: "<<newfleet->getWeight()<<endl;
-			cout<<"Total colonists: "<<newfleet->getColonistCount()<<endl;
-			cout<<"Total colony ship protected: "<<newfleet->countProtectedShips()<<endl;
-			cout<<"Has medic: "<<(newfleet->hasMedic()?"Yes":"No")<<endl;
 			cout<<"Add more ships? (Y/N):  ";
 			while (!(std::cin >> moreShip)|!toupper(moreShip)=='Y'|!toupper(moreShip)=='N') {
 				cout << "Please enter a response (Y/N): \n";
