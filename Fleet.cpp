@@ -10,20 +10,33 @@
 using namespace std;
 
 Fleet::Fleet(string cn):corName(cn){
+	cost=0;
 	weight=0;
 	colonistCount=0;
+	numOfColonyShipProtected=0;
+	medicShip=false;
+	energyConsumption=0;
+	eneProduction=0;
 }
 
 void Fleet::addWeight(Ship* s){
-		weight+=(s->getWeight());
+	weight+=(s->getWeight());
+}
+
+void Fleet::addEnergyConsumption(Ship* s){
+	energyConsumption+=(s->getEnergyConsumption());
 }
 
 void Fleet::addColonists(ColonyShip* s){
-		colonistCount+=s->getColonistCount();
+	colonistCount+=s->getColonistCount();
 }
 
-void Fleet::setTotalCost(int newCost){//must be less than 10,000
-	cost = newCost;
+void Fleet::addEnergyProduction(SolarSailShip* s){
+	eneProduction+=s->getEnergyProduction();
+}
+
+void Fleet::addCost(Ship* s){//must be less than 10,000
+	cost += s->getCost();
 }
 
 int Fleet::getWeight() const
@@ -48,7 +61,7 @@ int Fleet::getCost() const
 
 int Fleet::EnergyProduction() const
 {
-	return energyProduction;
+	return eneProduction;
 } // Returns cumulative energy production of fleet
 
 int Fleet::countProtectedShips() const
@@ -58,9 +71,7 @@ int Fleet::countProtectedShips() const
 
 bool Fleet::hasMedic() const
 {
-	for(int i=0; i< allShipList.size();i++)
-		if((*allShipList[i]).getTypeName()=="Medic" )
-	return true;
+	return medicShip;
 } // Returns True if the fleet has a medic ship, false otherwise
 
 string Fleet::getCorporationName() const
@@ -70,7 +81,17 @@ string Fleet::getCorporationName() const
 
 vector<Ship*> Fleet::protectedShips() const
 {
-	return allShipList;
+	vector<Ship*> protectedList;
+	int tempAmtOfProt=numOfColonyShipProtected;//temporary amount of colony ship protected
+	for(int i=0; i< colonyShips().size();i++){
+		if(tempAmtOfProt>0){
+			if((*(colonyShips()[i])).getTypeName()=="Cloud"){
+				tempAmtOfProt--;
+				protectedList.push_back(colonyShips()[i]);
+			}
+		}
+	}
+	return protectedList;
 } // Returns a vector with ship numbers of protected colony ships
 
 vector<Ship*> Fleet::unprotectedShips() const
@@ -82,8 +103,8 @@ vector<Ship*> Fleet::colonyShips() const
 {
 	vector<Ship*> colonyShipList;
 	for(int i=0; i< allShipList.size();i++)
-		if((*allShipList[i]).getTypeName()=="Ferry" | (*allShipList[i]).getTypeName()=="Liner" |(*allShipList[i]).getTypeName()=="Cloud" )
-			colonyShipList.push_back(allShipList[i]);
+	if((*allShipList[i]).getTypeName()=="Ferry" | (*allShipList[i]).getTypeName()=="Liner" |(*allShipList[i]).getTypeName()=="Cloud" )
+	colonyShipList.push_back(allShipList[i]);
 	return colonyShipList;
 } // Returns a vector with ship numbers of all ships that are a colony ship
 
@@ -94,8 +115,8 @@ vector<Ship*> Fleet::shipList() const
 
 void Fleet::destroyShip(Ship* i) {
 	allShipList.erase(
-		remove(allShipList.begin(), allShipList.end(), i),
-		allShipList.end()
+	remove(allShipList.begin(), allShipList.end(), i),
+	allShipList.end()
 	);
 } // Removes ship i from the fleet
 
@@ -106,8 +127,19 @@ unsigned int Fleet::speedOfFleet(){
 void Fleet::addShipIntoList(Ship* i){
 	allShipList.push_back(i);
 	addWeight(i);
+	addEnergyConsumption(i);
+	addCost(i);
+	
 	if((*i).getTypeName()=="Ferry" | (*i).getTypeName()=="Liner" |(*i).getTypeName()=="Cloud" )
 		addColonists((ColonyShip*)i);
+	else if((*i).getTypeName()=="Radiant" | (*i).getTypeName()=="Ebulient")
+		addEnergyProduction((SolarSailShip*)i);
+	else if((*i).getTypeName()=="Medic")
+		medicShip = true;
+	else if((*i).getTypeName()=="Cruiser" | (*i).getTypeName()=="Frigate" |(*i).getTypeName()=="Frigate" ){
+		numOfColonyShipProtected+=1;
+		numOfColonyShipProtected+=((((MilitaryEscortShip*)i)->getNrProtected())/2);
+	}
 }
 
 void Fleet::setColonists(int colonists){

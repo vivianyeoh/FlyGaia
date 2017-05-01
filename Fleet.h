@@ -13,11 +13,15 @@ public:
 	
 	void addWeight(Ship* s);
 	
+	void addEnergyConsumption(Ship* s);
+	
+	void addCost(Ship* s);
+	
+	void addEnergyProduction(SolarSailShip* s);
+	
 	void addColonists(ColonyShip* s);
 
 	void setColonists(int colonists);
-	
-	void setTotalCost(int newCost);
 	
 	int getWeight() const; // Returns cumulative weight of fleet
 
@@ -58,14 +62,15 @@ protected:
 
 	int cost; // Returns cumulative fleet cost (must less than 10,000)
 
-	int energyProduction; // Returns cumulative energy production of fleet
+	int eneProduction; // Returns cumulative energy production of fleet
 
-	int medicShip;// number of medic ship
+	bool medicShip;//has medic ship
 
 	string corName; // Returns your chosen name of your corporation.
 
 	vector<Ship*> allShipList;// Returns a vector with all ships in the fleet	
 	
+	int numOfColonyShipProtected;
 };
 
 #endif

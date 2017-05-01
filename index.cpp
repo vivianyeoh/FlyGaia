@@ -14,11 +14,13 @@
 #include "GaiaSector.h"
 #include "Ship.h"
 
-#define NUM_THREADS 3
+#define NUM_THREADS 5
 
 using namespace std;
 
 void *compareFleet(void *threadid);
+void *diseaseAttack(void *threadid);
+void *alienAttack(void *threadid);
 void *setFleetandPopulation(void *threadid);
 void splashScreen();
 void displayGaiaCurrentData();
@@ -118,8 +120,36 @@ int main(  )
 	}
 	
 	pthread_exit(NULL);	
+	
+	i=3;//thread 2
+	rc = pthread_create(&threads[i], NULL, diseaseAttack, (void *)i);
+	
+	if (rc){
+		cout << "Error:unable to create thread," << rc << endl;
+		exit(-1);
+	}
+	
+	pthread_exit(NULL);	
+	
+	i=4;//thread 2
+	rc = pthread_create(&threads[i], NULL, alienAttack, (void *)i);
+	
+	if (rc){
+		cout << "Error:unable to create thread," << rc << endl;
+		exit(-1);
+	}
+	
+	pthread_exit(NULL);	
 
 	return 0;
+}
+
+void *diseaseAttack(void *threadid){
+	
+}
+
+void *alienAttack(void *threadid){
+	
 }
 
 void *timePassingYear(void *threadid)
@@ -355,8 +385,6 @@ Fleet* displayCorporationDetails(const char *filename){
 		}
 	}
 	
-	newfleet->setTotalCost(costOfShips);
-	
 	for(int i=0; i<((*newfleet).shipList()).size();i++){
 		cout<<(i+1)<<". "<<((*newfleet).shipList())[i]->getTypeName()<<endl;
 	}
@@ -388,8 +416,8 @@ Fleet* userInterfaceCreateFleet(){
 	cout<<"\t|   10001   |   Liner   | 1000 |   20   |      7       |    250 Colonists    |"<<endl;
 	cout<<"\t|   10002   |   Cloud   | 2000 |   30   |      9       |    750 Colonists    |"<<endl;
 	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
-	cout<<"\t|   10003   |   Radiant |  50  |    3   |      5       | *Generate 50 Energy |"<<endl;
-	cout<<"\t|   10004   |  Ebulient | 250  |   50   |      5       |*Generate 500 Energy |"<<endl;
+	cout<<"\t|   10003   |   Radiant |   50 |    3   |      5       |  *Generate 50 Energy|"<<endl;
+	cout<<"\t|   10004   |  Ebulient |  250 |   50   |      5       | *Generate 500 Energy|"<<endl;
 	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10005   |   Cruiser |  300 |    2   |     10       |      0 Fighters     |"<<endl;
 	cout<<"\t|   10006   |   Frigate | 1000 |    7   |     20       |     10 Fighters     |"<<endl;
@@ -398,7 +426,8 @@ Fleet* userInterfaceCreateFleet(){
 	cout<<"\t|   10008   |   Medic   | 1000 |    1   |      1       |                     |"<<endl;
 	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\n\n*Consumption as in Energy Consumption\n";
-	cout<<"*Generate as in Generate Energy\n\n\n";
+	cout<<"*Generate as in Generate Energy for ship\n";
+	cout<<"Each corporation has only 10,000 UNP to spend on ships. \n\n\n";
 	
 	Fleet* newfleet = new Fleet(corName);
 	string inputShipType;
@@ -411,7 +440,7 @@ Fleet* userInterfaceCreateFleet(){
 	
 	do{
 		int shipCode=0;
-		cout<<"Type of ship (Please key in the ship code): ";	
+		cout<<"\n\nType of ship (Please key in the ship code): ";	
 		while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)) {
 			cout << "Type of ship (Please key in the ship code): ";
 			cin.clear();
@@ -530,6 +559,13 @@ Fleet* userInterfaceCreateFleet(){
 		outputFile <<inputShipType<<" "<<amount<<endl;
 		
 		if(costOfShips<10000){
+			cout<<"Total Cost: "<<newfleet->getCost()<<endl;
+			cout<<"Total energy consumpted: "<<newfleet->getEnergyConsumption()<<endl;
+			cout<<"Total energy generated: "<<newfleet->EnergyProduction()<<endl;
+			cout<<"Total weight: "<<newfleet->getWeight()<<endl;
+			cout<<"Total colonists: "<<newfleet->getColonistCount()<<endl;
+			cout<<"Total colony ship protected: "<<newfleet->countProtectedShips()<<endl;
+			cout<<"Has medic: "<<(newfleet->hasMedic()?"Yes":"No")<<endl;
 			cout<<"Add more ships? (Y/N):  ";
 			while (!(std::cin >> moreShip)|!toupper(moreShip)=='Y'|!toupper(moreShip)=='N') {
 				cout << "Please enter a response (Y/N): \n";
@@ -541,8 +577,6 @@ Fleet* userInterfaceCreateFleet(){
 			break;
 		}
 	}while(toupper(moreShip)=='Y');
-	
-	newfleet->setTotalCost(costOfShips);
 	
 	cout<<"Total ship purchased: \n";
 	for(int i=0; i<((*newfleet).shipList()).size();i++){
