@@ -20,6 +20,7 @@ using namespace std;
 void *gaiaExist(void *threadid);
 void *displayYearPopulation(void *threadid);
 void splashScreen();
+void rivalBoard();
 void waitOneYear();
 Fleet* displayCorporationDetails(const char *filename);
 Fleet* userInterfaceCreateFleet(); 
@@ -68,6 +69,20 @@ int main(  )
 	Fleet* corporation4 = displayCorporationDetails("018957-fleet.dat");
 	
 	Fleet* testCor = userInterfaceCreateFleet();
+	
+	cout<<"\nTime to launch the fleet!"<<endl;
+	cout<<"3"<<endl;
+	Sleep(2000);
+	cout<<"2"<<endl;
+	Sleep(2000);
+	cout<<"1"<<endl;
+	Sleep(2000);
+	for(int i=0;i<10; i++){
+		cout<<"-";	
+		Sleep(500);
+	}
+	cout<<">"<<endl;
+	
 	/*
 	pthread_t threads[NUM_THREADS];
 	int rc;
@@ -285,29 +300,38 @@ Fleet* displayCorporationDetails(const char *filename){
 }
 
 Fleet* userInterfaceCreateFleet(){
+	cout<<"\n\n";
+	
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	
+	
+	cout<<"\n\nShip Purchasing Panel"<<endl;
 	cout<<"Corporation code(5 digits) (Same corporation code to overwrite previous data): ";
 	string corName;
 	while(std::getline(std::cin,corName) && corName.size() != 5) {
-		cout << "Please enter a valid Corporation code(5 digits)!\n";
+		cout << "Please enter a valid Corporation code(5 digits): ";
 	}
 	
 	cout<<"\n\n";
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t| Ship Code | Ship Type | Cost | Weight | Consumption* | Other               |"<<endl;
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10000   |   Ferry   |  500 |   10   |      5       |    100 Colonists    |"<<endl;
 	cout<<"\t|   10001   |   Liner   | 1000 |   20   |      7       |    250 Colonists    |"<<endl;
 	cout<<"\t|   10002   |   Cloud   | 2000 |   30   |      9       |    750 Colonists    |"<<endl;
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10003   |   Radiant |  50  |    3   |      5       | *Generate 50 Energy |"<<endl;
 	cout<<"\t|   10004   |  Ebulient | 250  |   50   |      5       |*Generate 500 Energy |"<<endl;
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10005   |   Cruiser |  300 |    2   |     10       |      0 Fighters     |"<<endl;
 	cout<<"\t|   10006   |   Frigate | 1000 |    7   |     20       |     10 Fighters     |"<<endl;
 	cout<<"\t|   10007   | Destroyer | 2000 |   19   |     30       |     25 Fighters     |"<<endl;
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\t|   10008   |   Medic   | 1000 |    1   |      1       |                     |"<<endl;
-	cout<<"\t------------|-----------+------+--------+--------------+---------------------|"<<endl;
+	cout<<"\t------------+-----------+------+--------+--------------+----------------------"<<endl;
 	cout<<"\n\n*Consumption as in Energy Consumption\n";
 	cout<<"*Generate as in Generate Energy\n\n\n";
 	
@@ -459,7 +483,15 @@ Fleet* userInterfaceCreateFleet(){
 	for(int i=0; i<((*newfleet).shipList()).size();i++){
 		cout<<(i+1)<<". "<<((*newfleet).shipList())[i]->getTypeName()<<endl;
 	}
-
+	cout<<"\n\n";
+	
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	
+	
+	cout<<"\n\n";
 
 	return newfleet;
 }
