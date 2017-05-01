@@ -4,7 +4,7 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
-#define SPEED_OF_LIGHT_IN_KMS 299792L
+#define SPEED_OF_LIGHT_IN_MS 299792458L
 
 
 using namespace std;
@@ -13,6 +13,7 @@ Fleet::Fleet(string cn):corName(cn){
 	cost=0;
 	weight=0;
 	colonistCount=0;
+	numOfFighters=0;
 	numOfColonyShipProtected=0;
 	medicShip=false;
 	energyConsumption=0;
@@ -27,8 +28,12 @@ void Fleet::addEnergyConsumption(Ship* s){
 	energyConsumption+=(s->getEnergyConsumption());
 }
 
-void Fleet::addColonists(ColonyShip* s){
-	colonistCount+=s->getColonistCount();
+void Fleet::countColonists(){
+	colonistCount=0;
+	for(int i=0; i< colonyShips().size();i++){
+		if(!(((ColonyShip*)((colonyShips())[i]))->isInfected()))
+		colonistCount+=(((ColonyShip*)((colonyShips())[i]))->getColonistCount());
+	}
 }
 
 void Fleet::addEnergyProduction(SolarSailShip* s){
@@ -66,7 +71,7 @@ int Fleet::EnergyProduction() const
 
 int Fleet::countProtectedShips() const
 {
-	return protectedShips().size();
+	return numOfColonyShipProtected+(int)(numOfFighters/2);
 } // Returns nr of colony ships protected in fleet
 
 bool Fleet::hasMedic() const
@@ -82,21 +87,93 @@ string Fleet::getCorporationName() const
 vector<Ship*> Fleet::protectedShips() const
 {
 	vector<Ship*> protectedList;
-	int tempAmtOfProt=numOfColonyShipProtected;//temporary amount of colony ship protected
+	
+	int tempAmtOfProt=countProtectedShips();//temporary amount of colony ship protected
+	
 	for(int i=0; i< colonyShips().size();i++){
 		if(tempAmtOfProt>0){
-			if((*(colonyShips()[i])).getTypeName()=="Cloud"){
+			if((*(colonyShips()[i])).getTypeName()=="Cloud"){//bigger ship will be prioritized
 				tempAmtOfProt--;
 				protectedList.push_back(colonyShips()[i]);
 			}
+		}else{
+			break;
 		}
 	}
+	
+	for(int i=0; i< colonyShips().size();i++){
+		if(tempAmtOfProt>0){
+			if((*(colonyShips()[i])).getTypeName()=="Liner"){
+				tempAmtOfProt--;
+				protectedList.push_back(colonyShips()[i]);
+			}
+		}else{
+			break;
+		}
+	}
+	for(int i=0; i< colonyShips().size();i++){
+		if(tempAmtOfProt>0){
+			if((*(colonyShips()[i])).getTypeName()=="Ferry"){
+				tempAmtOfProt--;
+				protectedList.push_back(colonyShips()[i]);
+			}
+		}else{
+			break;
+		}
+	}
+	
 	return protectedList;
 } // Returns a vector with ship numbers of protected colony ships
 
 vector<Ship*> Fleet::unprotectedShips() const
 {
-	return allShipList;
+	vector<Ship*> unProtectedList;
+	vector<Ship*> cloudList;
+	vector<Ship*> linerList;
+	vector<Ship*> ferryList;
+	
+	for(int i=0; i< colonyShips().size();i++){
+		if((*(colonyShips()[i])).getTypeName()=="Cloud"){
+			cloudList.push_back(colonyShips()[i]);
+		}else if((*(colonyShips()[i])).getTypeName()=="Liner"){
+			linerList.push_back(colonyShips()[i]);
+		}else if((*(colonyShips()[i])).getTypeName()=="Ferry"){
+			ferryList.push_back(colonyShips()[i]);
+		}
+	}
+	
+	for(int i=0; i< protectedShips().size();i++){
+		if((*(protectedShips()[i])).getTypeName()=="Cloud"){//bigger ship will be prioritized
+			cloudList.erase(cloudList.begin());
+		}else if((*(protectedShips()[i])).getTypeName()=="Liner"){
+			linerList.erase(linerList.begin());
+		}else if((*(protectedShips()[i])).getTypeName()=="Ferry"){
+			ferryList.erase(ferryList.begin());
+		}
+	}
+	
+
+	if(cloudList.size()>0){
+		for(int i=0; i<cloudList.size(); i++){
+			unProtectedList.push_back(cloudList[i]);
+		}
+	}
+	
+	if(linerList.size()>0){
+		for(int i=0; i<linerList.size(); i++){
+			unProtectedList.push_back(linerList[i]);
+		}
+	}
+	
+	if(ferryList.size()>0){
+		
+		for(int i=0; i<ferryList.size(); i++){
+			unProtectedList.push_back(ferryList[i]);
+		}
+		
+	}
+	
+	return unProtectedList;
 } // Returns a vector with ship numbers of unprotected colony ships
 
 vector<Ship*> Fleet::colonyShips() const
@@ -113,15 +190,17 @@ vector<Ship*> Fleet::shipList() const
 	return allShipList;
 } // Returns a vector with all ships in the fleet
 
-void Fleet::destroyShip(Ship* i) {
-	allShipList.erase(
-	remove(allShipList.begin(), allShipList.end(), i),
-	allShipList.end()
-	);
+void Fleet::destroyShip(Ship* s) {
+	for(int i=0; i<allShipList.size(); i++){
+		if(allShipList[i]==s){
+			allShipList.erase(allShipList.begin() + i);
+			break;
+		}			
+	}
 } // Removes ship i from the fleet
 
 unsigned int Fleet::speedOfFleet(){
-	return ((10*(unsigned int)SPEED_OF_LIGHT_IN_KMS)/(sqrt (weight)));
+	return ((10*(unsigned int)SPEED_OF_LIGHT_IN_MS)/(sqrt (weight)));
 }
 
 void Fleet::addShipIntoList(Ship* i){
@@ -129,16 +208,14 @@ void Fleet::addShipIntoList(Ship* i){
 	addWeight(i);
 	addEnergyConsumption(i);
 	addCost(i);
-	
-	if((*i).getTypeName()=="Ferry" | (*i).getTypeName()=="Liner" |(*i).getTypeName()=="Cloud" )
-		addColonists((ColonyShip*)i);
-	else if((*i).getTypeName()=="Radiant" | (*i).getTypeName()=="Ebulient")
-		addEnergyProduction((SolarSailShip*)i);
+	countColonists();
+	if((*i).getTypeName()=="Radiant" | (*i).getTypeName()=="Ebulient")
+	addEnergyProduction((SolarSailShip*)i);
 	else if((*i).getTypeName()=="Medic")
-		medicShip = true;
-	else if((*i).getTypeName()=="Cruiser" | (*i).getTypeName()=="Frigate" |(*i).getTypeName()=="Frigate" ){
-		numOfColonyShipProtected+=1;
-		numOfColonyShipProtected+=((((MilitaryEscortShip*)i)->getNrProtected())/2);
+	medicShip = true;
+	else if((*i).getTypeName()=="Cruiser" | (*i).getTypeName()=="Frigate" |(*i).getTypeName()=="Destroyer" ){
+		numOfColonyShipProtected++;
+		numOfFighters+=((MilitaryEscortShip*)i)->getNrProtected();
 	}
 }
 

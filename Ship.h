@@ -9,7 +9,7 @@ class Ship
 public:
 	
 	Ship(int energyConsump,int shipWeight,int shipCost,string shipType);
-
+	
 	int getEnergyConsumption() const; // Returns energy consumption of a ship
 
 	int getWeight() const; // Returns weight of a ship ( Military escort ships prioritise bigger ships)
@@ -76,8 +76,6 @@ public:
 	int getNrProtected() const;// Returns nr of colony ships protected by this ship
 	
 protected:
-
-	int nrOfColonyShip;
 	
 	int fighters;
 };

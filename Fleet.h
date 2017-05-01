@@ -19,7 +19,7 @@ public:
 	
 	void addEnergyProduction(SolarSailShip* s);
 	
-	void addColonists(ColonyShip* s);
+	void countColonists();
 
 	void setColonists(int colonists);
 	
@@ -47,7 +47,7 @@ public:
 
 	vector<Ship*> shipList() const; // Returns a vector with all ships in the fleet
 
-	void destroyShip(Ship* i); // Removes ship i from the fleet
+	void destroyShip(Ship* s); // Removes ship i from the fleet
 
 	unsigned int speedOfFleet();
 	
@@ -71,6 +71,8 @@ protected:
 	vector<Ship*> allShipList;// Returns a vector with all ships in the fleet	
 	
 	int numOfColonyShipProtected;
+	
+	int numOfFighters;
 };
 
 #endif

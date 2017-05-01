@@ -41,6 +41,7 @@ int ColonyShip::getColonistCount() const{
 
 void ColonyShip::infect(){
 	infectedStatus = true;
+	nrOfColonists=0;
 } // Infects a colony ship
 
 bool ColonyShip::isInfected() const{
@@ -58,6 +59,6 @@ int SolarSailShip::getEnergyProduction() const{
 MilitaryEscortShip::MilitaryEscortShip(int e,int sw,int sc,string st, int cs):Ship(e,sw,sc,st),fighters(cs){}
 
 int MilitaryEscortShip::getNrProtected() const{
-	return nrOfColonyShip;
+	return fighters;
 } // Returns nr of colony ships protected by this ship
 

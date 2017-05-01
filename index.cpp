@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <math.h>  
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,13 +15,13 @@
 #include "GaiaSector.h"
 #include "Ship.h"
 
-#define NUM_THREADS 5
+#define NUM_THREADS 3
 
 using namespace std;
 
 void *compareFleet(void *threadid);
-void *diseaseAttack(void *threadid);
-void *alienAttack(void *threadid);
+void alienAttack(Fleet * f);
+void diseaseAttack(Fleet * f);
 void *setFleetandPopulation(void *threadid);
 void splashScreen();
 void displayGaiaCurrentData();
@@ -65,20 +66,9 @@ int main(  )
 	cout<<"Existing competitors:\n";
 	cout<<"\nCorporation under: 025280"<<endl;
 	corporation1 = displayCorporationDetails("025280-fleet.dat");
-	/*
-	cout<<"\nCorporation under: 023330"<<endl;
-	Fleet* corporation2 = displayCorporationDetails("023330-fleet.dat");
-	
-	cout<<"\nCorporation under: 019785"<<endl;
-	Fleet* corporation3 = displayCorporationDetails("019785-fleet.dat");
-	
-	cout<<"\nCorporation under: 018957"<<endl;
-	Fleet* corporation4 = displayCorporationDetails("018957-fleet.dat");
-	*/
-	
 	userCor = userInterfaceCreateFleet();
 	
-	/*cout<<"\nTime to launch the fleet!"<<endl;
+	cout<<"\nTime to launch the fleet!"<<endl;
 	cout<<"3"<<endl;
 	Sleep(500);
 	cout<<"2"<<endl;
@@ -90,7 +80,13 @@ int main(  )
 		Sleep(200);
 	}
 	cout<<">"<<endl;
-	*/
+	
+	cout<<"\n\nAlien attacked all fleets!"<<endl;
+	alienAttack(corporation1);
+	alienAttack(userCor);
+	cout<<"\n\nA disease broke out!"<<endl;
+	diseaseAttack(corporation1);
+	diseaseAttack(userCor);
 	
 	pthread_t threads[NUM_THREADS];
 	int rc;
@@ -120,40 +116,70 @@ int main(  )
 	}
 	
 	pthread_exit(NULL);	
-	
-	i=3;//thread 2
-	rc = pthread_create(&threads[i], NULL, diseaseAttack, (void *)i);
-	
-	if (rc){
-		cout << "Error:unable to create thread," << rc << endl;
-		exit(-1);
-	}
-	
-	pthread_exit(NULL);	
-	
-	i=4;//thread 2
-	rc = pthread_create(&threads[i], NULL, alienAttack, (void *)i);
-	
-	if (rc){
-		cout << "Error:unable to create thread," << rc << endl;
-		exit(-1);
-	}
-	
-	pthread_exit(NULL);	
 
 	return 0;
 }
 
-void *diseaseAttack(void *threadid){
+void alienAttack(Fleet * f){
+	cout<<"\n";
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	cout<<"\n\n";
+	cout<<"For Corporation "<<f->getCorporationName()<<endl;
+	cout<<"Total colonists before alien attack: "<<f->getColonistCount()<<endl;
 	
+	int numOfAttackedShip = ceil((f->unprotectedShips()).size()*0.25);
+	cout<<numOfAttackedShip<<" ship(s) is destroyed, remains are left behind!"<<endl;
+	
+	for(int i=((f->unprotectedShips()).size()-1); i>=0;i--){
+		f->destroyShip((f->unprotectedShips())[i]);
+	}
+	
+	f->countColonists();
+	cout<<"Total colonists after alien attack: "<<f->getColonistCount()<<endl;
+	cout<<"\n";
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	cout<<"\n\n";
 }
 
-void *alienAttack(void *threadid){
+void diseaseAttack(Fleet * f){
+	cout<<"\n";
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	cout<<"\n\n";
 	
+	cout<<"For Corporation "<<f->getCorporationName()<<endl;
+	if(f->hasMedic()){
+		cout<<"This corporation has medic ship and all colonists is saved!"<<endl;
+	}else{
+		cout<<"No medic to save colonists!"<<endl;
+		f->countColonists();
+		srand(time(NULL));
+		int r = rand()%((f->colonyShips()).size());
+		((ColonyShip*)((f->colonyShips())[r]))->infect();
+		if(((ColonyShip*)((*f).colonyShips()[r]))->isInfected()){
+			cout<<"All colonists on ships of type "<<((f->shipList())[r])->getTypeName()<<" is infected "<<endl;
+			cout<<"Total colonists before disease broke out is "<<f->getColonistCount()<<endl;
+		}
+		f->countColonists();
+		cout<<"Total colonists before disease broke out is "<<f->getColonistCount()<<endl;
+	}
+	cout<<"\n";
+	for(int i=0; i<105; i++)
+	{
+		cout<<"x";
+	}
+	cout<<"\n\n";
 }
 
-void *timePassingYear(void *threadid)
-{
+void *timePassingYear(void *threadid){
 	while(true){		
 		if(year>10){
 			break;
@@ -163,7 +189,8 @@ void *timePassingYear(void *threadid)
 		settlerGaia->setColonists(gaia->getPopulation());
 		year++;
 
-	}pthread_exit(NULL);
+	}
+	pthread_exit(NULL);
 }
 
 void *compareFleet(void *threadid) {	
@@ -202,6 +229,7 @@ void *compareFleet(void *threadid) {
 }
 
 void *setFleetandPopulation(void *threadid) {
+
 	int tempYear = 0;
 	while(true){
 		if(year>10){
@@ -218,8 +246,7 @@ void *setFleetandPopulation(void *threadid) {
 }
 
 void displayGaiaCurrentData(){
-	cout<<"\n";
-	cout<<"\nYear: "<<year<<" in Gaia"<<endl;
+	cout<<"\n\n";
 	
 	if(year==4){
 		if(settlerGaiaChanged){
@@ -230,12 +257,12 @@ void displayGaiaCurrentData(){
 		}
 	}
 	
+	cout<<"\nYear: "<<year<<" in Gaia"<<endl;
 	cout<<"Current Population in Gaia: "<<(*gaia).getPopulation()<<endl;
-	cout<<"Corporation Code "<<(*settlerGaia).getCorporationName()<<" with a population of "<<(*settlerGaia).getColonistCount()<<" is colonising Gaia!";
+	cout<<"Corporation Code "<<(*settlerGaia).getCorporationName()<<" with a population of "<<(*settlerGaia).getColonistCount()<<" is colonising Gaia!"<<endl;
 }
 
-void splashScreen()
-{
+void splashScreen(){
 	
 	cout<<"\n\n";
 	
@@ -402,10 +429,10 @@ Fleet* userInterfaceCreateFleet(){
 	
 	
 	cout<<"\n\nShip Purchasing Panel"<<endl;
-	cout<<"Corporation code(5 digits) (Same corporation code to overwrite previous data): ";
+	cout<<"Corporation code(6 digits) (Same corporation code to overwrite previous data): ";
 	string corName;
-	while(std::getline(std::cin,corName) && corName.size() != 5) {
-		cout << "Please enter a valid Corporation code(5 digits): ";
+	while(std::getline(std::cin,corName) && corName.size() != 6) {
+		cout << "Please enter a valid Corporation code(6 digits): ";
 	}
 	
 	cout<<"\n\n";
@@ -445,7 +472,7 @@ Fleet* userInterfaceCreateFleet(){
 		
 		while (!(std::cin >> shipCode)| (shipCode<10000|shipCode>10008)|(newfleet->EnergyProduction()<=newfleet->getEnergyConsumption()&&(shipCode!=10003&&shipCode!=10004))) {
 			if((newfleet->EnergyProduction()<=newfleet->getEnergyConsumption()&&(shipCode!=10003&&shipCode!=10004))){
-				cout<<"No energy generating! All ships in your fleet must have power, or else the entire fleet will not move!! Please purchase a Solar Sail Ships first (Radiant/Ebulient)"<<endl;
+				cout<<"Not enough energy to move the fleet!! Please purchase a Solar Sail Ships first (Radiant/Ebulient)"<<endl;
 				cout << "Type of ship (Please key in the ship code): ";	
 			}else{
 				cout << "Type of ship (Please key in the ship code): ";
@@ -465,13 +492,19 @@ Fleet* userInterfaceCreateFleet(){
 		int amount = 0;
 		while(amount!=purAmount){
 			boolean overSpent = false;
-			
+			boolean notEnoughEnergy = false;
+
 			switch(shipCode){
 			case 10000:
 				if((costOfShips+(*FerryColony).getCost())<=10000){
-					costOfShips+=(*FerryColony).getCost();
-					newfleet->addShipIntoList(FerryColony);
-					inputShipType = (*FerryColony).getTypeName();
+					if((newfleet->getEnergyConsumption()+FerryColony->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*FerryColony).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*FerryColony).getCost();
+						newfleet->addShipIntoList(FerryColony);
+						inputShipType = (*FerryColony).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FerryColony).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -479,9 +512,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10001:
 				if((costOfShips+(*LinerColony).getCost())<=10000){
-					costOfShips+=(*LinerColony).getCost();
-					newfleet->addShipIntoList(LinerColony);
-					inputShipType = (*LinerColony).getTypeName();
+					if((newfleet->getEnergyConsumption()+LinerColony->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*LinerColony).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*LinerColony).getCost();
+						newfleet->addShipIntoList(LinerColony);
+						inputShipType = (*LinerColony).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*LinerColony).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -489,9 +527,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10002:
 				if((costOfShips+(*CloudColony).getCost())<=10000){
-					costOfShips+=(*CloudColony).getCost();
-					newfleet->addShipIntoList(CloudColony);
-					inputShipType = (*CloudColony).getTypeName();
+					if((newfleet->getEnergyConsumption()+CloudColony->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*CloudColony).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*CloudColony).getCost();
+						newfleet->addShipIntoList(CloudColony);
+						inputShipType = (*CloudColony).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CloudColony).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -519,9 +562,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10005:
 				if((costOfShips+(*CruiserMilitaryEscort).getCost())<=10000){
-					costOfShips+=(*CruiserMilitaryEscort).getCost();
-					newfleet->addShipIntoList(CruiserMilitaryEscort);
-					inputShipType = (*CruiserMilitaryEscort).getTypeName();
+					if((newfleet->getEnergyConsumption()+CruiserMilitaryEscort->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*CruiserMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*CruiserMilitaryEscort).getCost();
+						newfleet->addShipIntoList(CruiserMilitaryEscort);
+						inputShipType = (*CruiserMilitaryEscort).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*CruiserMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -529,9 +577,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10006:
 				if((costOfShips+(*FrigateMilitaryEscort).getCost())<=10000){
-					costOfShips+=(*FrigateMilitaryEscort).getCost();
-					newfleet->addShipIntoList(FrigateMilitaryEscort);
-					inputShipType = (*FrigateMilitaryEscort).getTypeName();
+					if((newfleet->getEnergyConsumption()+FrigateMilitaryEscort->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*FrigateMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*FrigateMilitaryEscort).getCost();
+						newfleet->addShipIntoList(FrigateMilitaryEscort);
+						inputShipType = (*FrigateMilitaryEscort).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*FrigateMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -539,9 +592,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10007:
 				if((costOfShips+(*DestroyerMilitaryEscort).getCost())<=10000){
-					costOfShips+=(*DestroyerMilitaryEscort).getCost();
-					newfleet->addShipIntoList(DestroyerMilitaryEscort);
-					inputShipType = (*DestroyerMilitaryEscort).getTypeName();
+					if((newfleet->getEnergyConsumption()+DestroyerMilitaryEscort->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*DestroyerMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*DestroyerMilitaryEscort).getCost();
+						newfleet->addShipIntoList(DestroyerMilitaryEscort);
+						inputShipType = (*DestroyerMilitaryEscort).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*DestroyerMilitaryEscort).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -549,9 +607,14 @@ Fleet* userInterfaceCreateFleet(){
 				break;
 			case 10008:
 				if((costOfShips+(*medicShip).getCost())<=10000){
-					costOfShips+=(*medicShip).getCost();
-					newfleet->addShipIntoList(medicShip);
-					inputShipType = (*medicShip).getTypeName();
+					if((newfleet->getEnergyConsumption()+medicShip->getEnergyConsumption())>=newfleet->EnergyProduction()){
+						cout<<"Not Enough Energy! Ships after "<<amount<<" "<<(*medicShip).getTypeName()<<" are not purchased!"<<endl;
+						notEnoughEnergy=true;
+					}else{
+						costOfShips+=(*medicShip).getCost();
+						newfleet->addShipIntoList(medicShip);
+						inputShipType = (*medicShip).getTypeName();
+					}
 				}else{
 					cout<<"Cost more than 10,000! Ships after "<<amount<<" "<<(*medicShip).getTypeName()<<" are not purchased!"<<endl;
 					overSpent=true;
@@ -559,26 +622,26 @@ Fleet* userInterfaceCreateFleet(){
 				break;	
 				
 			}
-			if(overSpent==true)
+			
+			if(overSpent|notEnoughEnergy)
 			break;
 			amount++;
 		}
 		
 		outputFile <<inputShipType<<" "<<amount<<endl;
 		
-		
 		cout<<"Total Cost: "<<newfleet->getCost()<<endl;
 		cout<<"Total energy consumpted: "<<newfleet->getEnergyConsumption()<<endl;
 		cout<<"Total energy generated: "<<newfleet->EnergyProduction()<<endl;
 		cout<<"Total weight: "<<newfleet->getWeight()<<endl;
 		cout<<"Total colonists: "<<newfleet->getColonistCount()<<endl;
-		cout<<"Total colony ship protected: "<<newfleet->countProtectedShips()<<endl;
+		cout<<"Total protected ship: "<<newfleet->countProtectedShips()<<endl;
 		cout<<"Has medic: "<<(newfleet->hasMedic()?"Yes":"No")<<endl;
 		
 		if(costOfShips<10000){
 			cout<<"Add more ships? (Y/N):  ";
-			while (!(std::cin >> moreShip)|!toupper(moreShip)=='Y'|!toupper(moreShip)=='N') {
-				cout << "Please enter a response (Y/N): \n";
+			while (!(std::cin >> moreShip)|(toupper(moreShip)!='Y'&&toupper(moreShip)!='N')) {
+				cout << "Please enter a valid response (Y/N): ";
 				cin.clear();
 				cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 			}
